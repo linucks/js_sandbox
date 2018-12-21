@@ -1,0 +1,11 @@
+{
+  "name": "loopvalidate",
+  "version": "0.0.1",
+  "description": "test loop app",
+  "main": "LoopValidate.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC"
+}

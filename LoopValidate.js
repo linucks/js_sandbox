@@ -14,7 +14,6 @@ function validateData() {
   var ftir = new DataFrame(ss.getRange('FTIR!A:X').getValues(), 'Sample Number', 'ftir');
   var reagent = new DataFrame(ss.getRange('Reagent!A:W').getValues(), 'Sample Number', 'reagent');
 
-  Logger.log("catalog name is " + catalog.name);
   var dataframes = [catalog, ftir, reagent];
   var duplicates, data, ret="";
   for (d in dataframes) {
@@ -174,22 +173,5 @@ function column_differences(dataframes, columns){
   }
 }
 
-var values1 = [ ["Index","Column2","Column3","Column4"],
-                ["I1","X2R1","dup","C4R1"],
-                ["I2","C2R2","C3R2","C4R2"],
-                ["I3","C2R3","C3R3","C4R3"],
-                ["I4","X2R4","dup","C4R4"]];
-
-var values2 = [ ["Index","Column2","Column3","Column4"],
-                ["I1","C2R1","dup","C4R1"],
-                ["I2","C2R2","C3R2","C4R2"],
-                ["I3","C2R3","C3R3","C4R3"],
-                ["I4","C2R4","dup","C4R4"]];
-
-var df1 = new DataFrame(values1, 'Index');
-// console.log(df.duplicates('Column3'));
-// console.log(df1.select([1, 3], ['Column2', 'Column3']));
-var df2 = new DataFrame(values2, 'Index', 'd2');
-
-// console.log(column_differences([df1, df2, df1],['Column2']));
-console.log(df1.column_difference(df2, 'Column2'));
+module.exports.DataFrame = DataFrame;
+module.exports.column_differences = column_differences;
