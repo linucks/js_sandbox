@@ -96,13 +96,40 @@ exports.bookinstance_create_post = [
 ];
 
 // Display BookInstance delete form on GET.
-exports.bookinstance_delete_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: BookInstance delete GET');
+exports.bookinstance_delete_get = function(req, res, next) {
+  BookInstance.findById(req.params.id)
+  .populate('book')
+  .exec(function (err, bookinstance) {
+    if (err) { return next(err); }
+    if (bookinstance==null) { // No results.
+        var err = new Error('Book copy not found');
+        err.status = 404;
+        return next(err);
+      }
+    // Successful, so render.
+    res.render('bookinstance_delete', { title: 'Delete BookInstance', bookinstance: bookinstance} );
+  })
 };
 
 // Handle BookInstance delete on POST.
 exports.bookinstance_delete_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: BookInstance delete POST');
+  BookInstance.findById(req.params.id)
+  .populate('book')
+  .exec(function (err, bookinstance) {
+    if (err) { return next(err); }
+    if (bookinstance==null) { // No results.
+        var err = new Error('Book copy not found');
+        err.status = 404;
+        return next(err);
+      }
+      // Remove this instance
+      // Use body but could just use req.params.id?
+      BookInstance.findByIdAndRemove(req.body.bookinstanceid, function deleteBookinstance(err) {
+          if (err) { return next(err); }
+          // Success - go to Bookinstance list
+          res.redirect('/catalog/bookinstances')
+      })
+  })
 };
 
 // Display BookInstance update form on GET.
