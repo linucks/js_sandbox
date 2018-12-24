@@ -163,17 +163,20 @@ exports.book_create_post = [
     }
 ];
 
-// Display book delete form on GET.
-exports.book_delete_get = function(req, res) {
+const book_and_instances_cb = function(book_id){
+  return {
+    book: function(callback) {
+        Book.findById(book_id).exec(callback);
+    },
+    bookinstances: function(callback) {
+        BookInstance.find({'book': book_id}).exec(callback);
+    }
+  }
+}
+
+exports.book_delete_get = function(req, res, next) {
   // Get the book and and associated book Instances
-  async.parallel({
-      book: function(callback) {
-          Book.findById(req.params.id).exec(callback);
-      },
-      bookinstances: function(callback) {
-          BookInstance.find({'book': req.params.id}).exec(callback);
-      },
-  }, function(err, results) {
+  async.parallel(book_and_instances_cb(req.params.id), function(err, results) {
       if (err) { return next(err); }
       // CHECK FOR NO BOOK
       res.render('book_delete', { title: 'Delete Book', book: results.book, bookinstances: results.bookinstances} );
@@ -181,16 +184,9 @@ exports.book_delete_get = function(req, res) {
 };
 
 // Handle book delete on POST.
-exports.book_delete_post = function(req, res) {
+exports.book_delete_post = function(req, res, next) {
   // Get the book and and associated book Instances
-  async.parallel({
-      book: function(callback) {
-          Book.findById(req.params.id).exec(callback);
-      },
-      bookinstances: function(callback) {
-          BookInstance.find({'book': req.params.id}).exec(callback);
-      },
-  }, function(err, results) {
+  async.parallel(book_and_instances_cb(req.params.id), function(err, results) {
       if (err) { return next(err); }
       if (results.bookinstances.length) {
         res.render('book_delete', { title: 'Delete Book', book: results.book, bookinstances: results.bookinstances} );
