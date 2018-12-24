@@ -100,37 +100,53 @@ exports.genre_create_post =  [
   }
 ];
 
-// Display Genre delete form on GET.
-exports.genre_delete_get = function(req, res, next) {
-
-  let genre_id = req.params.id;
-  async.parallel({
+const genre_and_books_cb = function(genre_id) {
+  return {
       genre: function(callback) {
           Genre.findById(genre_id)
             .exec(callback);
       },
-
       book_list: function(callback) {
         Book.find({ 'genre': genre_id })
         .exec(callback);
-      },
+      }
+    }
+}
 
-  }, function(err, results) {
+// Handle Genre delete on GET/POST.
+genre_delete = function(req, res, next) {
+  let genre_id = req.params.id;
+  async.parallel(genre_and_books_cb(genre_id), function(err, results) {
       if (err) { return next(err); }
       if (results.genre==null) { // No results.
           var err = new Error('Genre not found');
           err.status = 404;
           return next(err);
       }
-      // Successful, so render
-      res.render('genre_delete', { title: 'Delete Genre', genre: results.genre, book_list: results.book_list });
+      if (req.method == 'GET' || results.book_list.length > 0) {
+          res.render('genre_delete', { title: 'Delete Genre', genre: results.genre, book_list: results.book_list });
+          return;
+      }
+      if (req.method == 'POST') {
+          // Genre has no books. Delete object and redirect to the list of authors.
+          Genre.findByIdAndRemove(genre_id, function deleteGenre(err) {
+              if (err) { return next(err); }
+              // Success - go to author list
+              res.redirect('/catalog/genres')
+          })
+      } else {
+        var err = new Error("GET WITH BOOK LIST == 0 - should never get here!");
+        err.status = 404;
+        return next(err);
+      }
   });
 };
 
+// Display Genre delete form on GET.
+exports.genre_delete_get = genre_delete;
+
 // Handle Genre delete on POST.
-exports.genre_delete_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Genre delete POST');
-};
+exports.genre_delete_post = genre_delete;
 
 // Display Genre update form on GET.
 exports.genre_update_get = function(req, res) {

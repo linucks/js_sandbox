@@ -1,4 +1,4 @@
-var Book = require('../models/book');
+  var Book = require('../models/book');
 var Author = require('../models/author');
 var Genre = require('../models/genre');
 var BookInstance = require('../models/bookinstance');
@@ -178,7 +178,11 @@ exports.book_delete_get = function(req, res, next) {
   // Get the book and and associated book Instances
   async.parallel(book_and_instances_cb(req.params.id), function(err, results) {
       if (err) { return next(err); }
-      // CHECK FOR NO BOOK
+      if (results.book==null) { // No results.
+          var err = new Error('Book not found');
+          err.status = 404;
+          return next(err);
+      }
       res.render('book_delete', { title: 'Delete Book', book: results.book, bookinstances: results.bookinstances} );
   });
 };
